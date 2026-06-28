@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Real-Time Motion Gesture Classifier</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+
+background:linear-gradient(135deg,#0f172a,#1e293b,#111827);
+
+color:white;
+
+min-height:100vh;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+padding:30px;
+
+}
+
+.container{
+
+width:100%;
+
+max-width:1100px;
+
+}
+
+.title{
+
+text-align:center;
+
+margin-bottom:30px;
+
+}
+
+.title h1{
+
+font-size:42px;
+
+font-weight:700;
+
+}
+
+.title p{
+
+color:#94a3b8;
+
+margin-top:10px;
+
+}
+
+.grid{
+
+display:grid;
+
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+
+gap:20px;
+
+}
+
+.card{
+
+background:rgba(255,255,255,0.08);
+
+backdrop-filter:blur(12px);
+
+border:1px solid rgba(255,255,255,.1);
+
+border-radius:20px;
+
+padding:25px;
+
+transition:.3s;
+
+}
+
+.card:hover{
+
+transform:translateY(-6px);
+
+box-shadow:0 15px 35px rgba(0,0,0,.4);
+
+}
+
+.label{
+
+font-size:14px;
+
+color:#94a3b8;
+
+margin-bottom:10px;
+
+}
+
+.value{
+
+font-size:30px;
+
+font-weight:700;
+
+}
+
+.green{
+
+color:#22c55e;
+
+}
+
+.blue{
+
+color:#38bdf8;
+
+}
+
+.orange{
+
+color:#f59e0b;
+
+}
+
+.red{
+
+color:#ef4444;
+
+}
+
+.history{
+
+margin-top:35px;
+
+background:rgba(255,255,255,.08);
+
+border-radius:20px;
+
+padding:25px;
+
+}
+
+.history h2{
+
+margin-bottom:20px;
+
+}
+
+table{
+
+width:100%;
+
+border-collapse:collapse;
+
+}
+
+th,td{
+
+padding:14px;
+
+text-align:left;
+
+}
+
+th{
+
+color:#38bdf8;
+
+}
+
+tr{
+
+border-bottom:1px solid rgba(255,255,255,.08);
+
+}
+
+.status{
+
+display:flex;
+
+align-items:center;
+
+gap:10px;
+
+}
+
+.dot{
+
+width:14px;
+
+height:14px;
+
+border-radius:50%;
+
+background:#22c55e;
+
+animation:pulse 1.5s infinite;
+
+}
+
+@keyframes pulse{
+
+0%{
+
+transform:scale(1);
+
+opacity:1;
+
+}
+
+50%{
+
+transform:scale(1.4);
+
+opacity:.5;
+
+}
+
+100%{
+
+transform:scale(1);
+
+opacity:1;
+
+}
+
+}
+
+footer{
+
+margin-top:35px;
+
+text-align:center;
+
+color:#94a3b8;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="title">
+
+<h1>🤖 Real-Time Motion Gesture Classifier</h1>
+
+<p>Edge Impulse • ESP32 • Firebase Realtime Database</p>
+
+</div>
+
+<div class="grid">
+
+<div class="card">
+
+<div class="label">
+
+Current Gesture
+
+</div>
+
+<div class="value blue" id="gesture">
+
+Waiting...
+
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="label">
+
+Confidence
+
+</div>
+
+<div class="value orange" id="confidence">
+
+0%
+
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="label">
+
+Last Updated
+
+</div>
+
+<div class="value" style="font-size:22px;" id="time">
+
+--
+
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="label">
+
+Status
+
+</div>
+
+<div class="status">
+
+<div class="dot"></div>
+
+<div class="value green" style="font-size:24px;" id="status">
+
+Connected
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="history">
+
+<h2>Recent Predictions</h2>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Gesture</th>
+
+<th>Confidence</th>
+
+<th>Time</th>
+
+</tr>
+
+</thead>
+
+<tbody id="history">
+
+</tbody>
+
+</table>
+
+</div>
+
+<footer>
+
+Real-Time Motion Gesture Recognition Web App
+
+</footer>
+
+</div>
+
+<script>
+
+const gestures = [
+"Left",
+"Right",
+"Up",
+"Down",
+"Idle"
+];
+
+function randomUpdate(){
+
+const gesture = gestures[Math.floor(Math.random()*gestures.length)];
+
+const confidence = Math.floor(Math.random()*21)+80;
+
+document.getElementById("gesture").innerHTML = gesture;
+document.getElementById("confidence").innerHTML = confidence + "%";
+document.getElementById("time").innerHTML = new Date().toLocaleTimeString();
+
+const row = document.createElement("tr");
+
+row.innerHTML = `
+<td>${gesture}</td>
+<td>${confidence}%</td>
+<td>${new Date().toLocaleTimeString()}</td>
+`;
+
+const history = document.getElementById("history");
+
+history.prepend(row);
+
+while(history.rows.length > 10){
+history.deleteRow(10);
+}
+
+}
+
+randomUpdate();
+
+setInterval(randomUpdate,3000);
+
+</script>
+
+</body>
+</html>
