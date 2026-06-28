@@ -110,4 +110,6 @@ https://github.com/Abhix47/edge-iot-motion-gesture
 
 Artificial Intelligence & Machine Learning Student
 
-Government Engineering College Internship Assignment
+**Internship Assignment**
+
+Government College of Engineering, Kannur (GCEK)  
