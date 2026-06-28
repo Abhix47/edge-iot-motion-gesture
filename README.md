@@ -1,51 +1,70 @@
 # Edge IoT Motion Gesture Recognition
 
+A real-time motion gesture recognition project built using **ESP32**, **MPU6050 Accelerometer**, **Edge Impulse**, and a **Firebase-hosted web application**. The system captures motion data from an accelerometer, performs on-device machine learning inference, and displays gesture predictions through a web dashboard.
+
+---
+
 ## Overview
 
-This project implements a real-time motion gesture recognition system using an ESP32 and an MPU6050 accelerometer. Motion data is collected from the sensor, processed using an Edge Impulse machine learning model, and classified into predefined gestures. The system also includes a web interface for interacting with the project.
+This project demonstrates how TinyML can be integrated with embedded systems to perform real-time gesture recognition. Motion data collected from the MPU6050 sensor is processed using an Edge Impulse machine learning model running on the ESP32. A responsive web interface is included to visualize gesture predictions.
 
 ---
 
 ## Features
 
-* Real-time motion data acquisition
-* Gesture recognition using Edge AI
-* ESP32-based embedded implementation
-* MPU6050 accelerometer integration
-* Edge Impulse inference
-* Web-based interface
-* Low-latency on-device prediction
+- Real-time motion gesture recognition
+- ESP32 embedded implementation
+- MPU6050 accelerometer integration
+- Edge Impulse machine learning model
+- Firebase-hosted web interface
+- Live dashboard showing:
+  - Current gesture
+  - Prediction confidence
+  - Last updated time
+  - Connection status
+  - Recent prediction history
 
 ---
 
-## Hardware
+## Technologies Used
 
-* ESP32 Development Board
-* MPU6050 Accelerometer
-* USB Cable
+- ESP32
+- MPU6050 Accelerometer
+- Edge Impulse
+- PlatformIO
+- Arduino Framework
+- Firebase Hosting
+- HTML
+- CSS
+- JavaScript
+- Visual Studio Code
 
 ---
 
-## Software & Tools
+## Hardware Requirements
 
-* PlatformIO
-* Arduino Framework
-* Edge Impulse
-* Visual Studio Code
-* Firebase Hosting
-* HTML, CSS & JavaScript
+- ESP32 Development Board
+- MPU6050 Accelerometer
+- USB Cable
 
 ---
 
 ## Project Structure
 
-```text
-edge-iot-motion-gesture
+```
+edge-iot-motion-gesture/
 │
 ├── Motion_Gesture_AI/
-├── Motion_Gesture_Reader/
-├── docs/
+│   └── ESP32 firmware and Edge Impulse model
+│
+├── Motion_Gesture_WebApp/
+│   └── Firebase-hosted web application
+│
 ├── images/
+│   └── dashboard.png
+│
+├── docs/
+│
 └── README.md
 ```
 
@@ -53,19 +72,35 @@ edge-iot-motion-gesture
 
 ## Workflow
 
-1. Read accelerometer data from the MPU6050.
-2. Preprocess sensor data.
+1. Read motion data from the MPU6050 sensor.
+2. Preprocess the sensor values.
 3. Run inference using the Edge Impulse model.
-4. Predict the performed gesture.
-5. Display the prediction through the application.
+4. Classify the performed gesture.
+5. Display the prediction on the web dashboard.
 
 ---
 
-## Current Status
+## Web Application
 
-🚧 Project under development.
+The project includes a responsive web dashboard that displays motion gesture predictions in real time.
 
-The project will be updated as the assignment progresses with source code, documentation, screenshots, and deployment details.
+### Live Demo
+
+https://edge-iot-motion-gesture.web.app/
+
+---
+
+## Screenshot
+
+![Motion Gesture Dashboard](images/dashboard.png)
+
+---
+
+## Repository
+
+GitHub Repository:
+
+https://github.com/Abhix47/edge-iot-motion-gesture
 
 ---
 
@@ -74,3 +109,5 @@ The project will be updated as the assignment progresses with source code, docum
 **Abhijith Sathyan**
 
 Artificial Intelligence & Machine Learning Student
+
+Government Engineering College Internship Assignment
