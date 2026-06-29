@@ -2,427 +2,623 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Real-Time Motion Gesture Classifier</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>GestureOS · Neural Motion Interface</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Poppins',sans-serif;
-}
-
-body{
-
-background:linear-gradient(135deg,#0f172a,#1e293b,#111827);
-
-color:white;
-
-min-height:100vh;
-
-display:flex;
-
-justify-content:center;
-
-align-items:center;
-
-padding:30px;
-
-}
-
-.container{
-
-width:100%;
-
-max-width:1100px;
-
-}
-
-.title{
-
-text-align:center;
-
-margin-bottom:30px;
-
-}
-
-.title h1{
-
-font-size:42px;
-
-font-weight:700;
-
-}
-
-.title p{
-
-color:#94a3b8;
-
-margin-top:10px;
-
-}
-
-.grid{
-
-display:grid;
-
-grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-
-gap:20px;
-
-}
-
-.card{
-
-background:rgba(255,255,255,0.08);
-
-backdrop-filter:blur(12px);
-
-border:1px solid rgba(255,255,255,.1);
-
-border-radius:20px;
-
-padding:25px;
-
-transition:.3s;
-
-}
-
-.card:hover{
-
-transform:translateY(-6px);
-
-box-shadow:0 15px 35px rgba(0,0,0,.4);
-
-}
-
-.label{
-
-font-size:14px;
-
-color:#94a3b8;
-
-margin-bottom:10px;
-
-}
-
-.value{
-
-font-size:30px;
-
-font-weight:700;
-
-}
-
-.green{
-
-color:#22c55e;
-
-}
-
-.blue{
-
-color:#38bdf8;
-
-}
-
-.orange{
-
-color:#f59e0b;
-
-}
-
-.red{
-
-color:#ef4444;
-
-}
-
-.history{
-
-margin-top:35px;
-
-background:rgba(255,255,255,.08);
-
-border-radius:20px;
-
-padding:25px;
-
-}
-
-.history h2{
-
-margin-bottom:20px;
-
-}
-
-table{
-
-width:100%;
-
-border-collapse:collapse;
-
-}
-
-th,td{
-
-padding:14px;
-
-text-align:left;
-
-}
-
-th{
-
-color:#38bdf8;
-
-}
-
-tr{
-
-border-bottom:1px solid rgba(255,255,255,.08);
-
-}
-
-.status{
-
-display:flex;
-
-align-items:center;
-
-gap:10px;
-
-}
-
-.dot{
-
-width:14px;
-
-height:14px;
-
-border-radius:50%;
-
-background:#22c55e;
-
-animation:pulse 1.5s infinite;
-
-}
-
-@keyframes pulse{
-
-0%{
-
-transform:scale(1);
-
-opacity:1;
-
-}
-
-50%{
-
-transform:scale(1.4);
-
-opacity:.5;
-
-}
-
-100%{
-
-transform:scale(1);
-
-opacity:1;
-
-}
-
-}
-
-footer{
-
-margin-top:35px;
-
-text-align:center;
-
-color:#94a3b8;
-
-}
-
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --void:    #080C14;
+    --panel:   #0D1422;
+    --border:  #1A2540;
+    --cyan:    #00F5D4;
+    --magenta: #F72585;
+    --amber:   #FFB703;
+    --violet:  #7B2FFF;
+    --text:    #E8EDF5;
+    --muted:   #4A5878;
+    --dim:     #1E2D48;
+  }
+
+  html, body { height: 100%; background: var(--void); color: var(--text); font-family: 'Inter', sans-serif; overflow: hidden; }
+
+  /* Scanlines */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px);
+    pointer-events: none; z-index: 9999;
+  }
+
+  .shell { display: grid; grid-template-rows: 48px 1fr; height: 100vh; }
+
+  /* ── Topbar ── */
+  .topbar {
+    display: flex; align-items: center; gap: 16px; padding: 0 18px;
+    border-bottom: 1px solid var(--border); background: var(--panel); position: relative; overflow: hidden;
+  }
+  .topbar::after {
+    content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent); opacity: 0.4;
+  }
+  .logo {
+    font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 13px;
+    letter-spacing: 0.14em; color: var(--cyan); text-transform: uppercase;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .logo-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--cyan);
+    box-shadow: 0 0 8px var(--cyan); animation: pdot 2s ease-in-out infinite;
+  }
+  @keyframes pdot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.3;transform:scale(0.6)} }
+
+  .fps { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.08em; }
+
+  /* Sensor mode badges */
+  .mode-badges { display: flex; gap: 6px; margin-left: auto; align-items: center; }
+  .badge {
+    font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 600;
+    letter-spacing: 0.1em; padding: 3px 9px; border-radius: 2px; border: 1px solid;
+    text-transform: uppercase; opacity: 0.35; transition: opacity 0.3s, box-shadow 0.3s;
+  }
+  .badge.active { opacity: 1; }
+  .badge-generic { border-color: var(--cyan);    color: var(--cyan);    }
+  .badge-hw      { border-color: var(--amber);   color: var(--amber);   }
+  .badge-sw      { border-color: var(--magenta); color: var(--magenta); }
+  .badge-live    {
+    border-color: var(--cyan); color: var(--cyan);
+    background: rgba(0,245,212,0.1); animation: blnk 1.2s step-end infinite;
+  }
+  @keyframes blnk { 50% { opacity: 0.2; } }
+
+  /* ── Main ── */
+  .main { display: grid; grid-template-columns: 1fr 300px; overflow: hidden; }
+
+  /* ── LEFT: Waveform ── */
+  .waveform-panel { display: flex; flex-direction: column; padding: 14px; gap: 10px; overflow: hidden; }
+
+  .sec-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 600;
+    letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sec-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .axis-rows { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; }
+
+  .axis-row { display: flex; flex-direction: column; gap: 3px; flex: 1; min-height: 0; }
+
+  .axis-header { display: flex; align-items: baseline; gap: 8px; }
+  .axis-tag { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.15em; width: 18px; }
+  .ax-x { color: var(--cyan); }
+  .ax-y { color: var(--magenta); }
+  .ax-z { color: var(--amber); }
+  .axis-val { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 300; color: var(--text); min-width: 58px; opacity: 0.8; }
+  .axis-unit { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--muted); }
+
+  .canvas-wrap {
+    flex: 1; min-height: 0; border: 1px solid var(--border); border-radius: 2px;
+    overflow: hidden; background: #060A10; position: relative;
+  }
+  .canvas-wrap::before {
+    content: ''; position: absolute; inset: 0;
+    background-image: linear-gradient(var(--dim) 1px, transparent 1px), linear-gradient(90deg, var(--dim) 1px, transparent 1px);
+    background-size: 40px 20px; pointer-events: none; opacity: 0.35;
+  }
+  .canvas-wrap canvas { display: block; width: 100%; height: 100%; }
+
+  /* ── RIGHT: Inference ── */
+  .inf-panel {
+    border-left: 1px solid var(--border);
+    display: flex; flex-direction: column; overflow-y: auto; scrollbar-width: none;
+  }
+  .inf-panel::-webkit-scrollbar { display: none; }
+  .inf-block { padding: 14px; border-bottom: 1px solid var(--border); }
+
+  /* Prediction hero */
+  .pred-hero {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    padding: 20px 14px; border-bottom: 1px solid var(--border);
+    background: linear-gradient(160deg, rgba(0,245,212,0.04) 0%, transparent 60%);
+    position: relative; overflow: hidden;
+  }
+  .pred-hero::after {
+    content: ''; position: absolute; top: -1px; left: 15%; right: 15%; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  }
+
+  /* Confidence ring */
+  .conf-wrap { position: relative; width: 76px; height: 76px; }
+  .conf-wrap svg { transform: rotate(-90deg); }
+  .ring-bg { fill: none; stroke: var(--border); stroke-width: 4; }
+  .ring-fg {
+    fill: none; stroke: var(--cyan); stroke-width: 4; stroke-linecap: round;
+    stroke-dasharray: 207; stroke-dashoffset: 207;
+    transition: stroke-dashoffset 0.5s ease, stroke 0.3s;
+    filter: drop-shadow(0 0 6px var(--cyan));
+  }
+  .conf-pct {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: var(--cyan);
+    transition: color 0.3s;
+  }
+
+  .pred-icon { font-size: 32px; line-height: 1; filter: drop-shadow(0 0 10px rgba(0,245,212,0.4)); transition: filter 0.3s; }
+
+  .pred-name {
+    font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 700;
+    letter-spacing: 0.1em; color: var(--cyan); text-transform: uppercase; text-align: center;
+    transition: color 0.3s;
+  }
+  .pred-name.idle-state { color: var(--muted); font-size: 11px; letter-spacing: 0.2em; }
+
+  /* ── Gesture probability cards ── */
+  .gesture-cards { display: flex; flex-direction: column; gap: 10px; }
+
+  .g-card {
+    border: 1px solid var(--border); border-radius: 3px; padding: 10px 12px;
+    display: flex; flex-direction: column; gap: 6px; transition: border-color 0.3s, background 0.3s;
+  }
+  .g-card.active-gesture { background: rgba(0,245,212,0.05); }
+
+  .g-card-top { display: flex; align-items: center; gap: 8px; }
+  .g-emoji { font-size: 18px; line-height: 1; }
+  .g-name {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  .g-pct {
+    margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    font-weight: 600; min-width: 36px; text-align: right;
+  }
+
+  /* Glow dot indicator */
+  .g-dot {
+    width: 7px; height: 7px; border-radius: 50%; border: 1px solid; flex-shrink: 0;
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+
+  .g-bar-track { height: 3px; background: var(--dim); border-radius: 2px; overflow: hidden; }
+  .g-bar-fill { height: 100%; border-radius: 2px; width: 0%; transition: width 0.4s cubic-bezier(0.4,0,0.2,1); }
+
+  /* per-gesture colours */
+  .g-circle { --gc: #00F5D4; }
+  .g-wave   { --gc: #F72585; }
+  .g-idle   { --gc: #FFB703; }
+  .g-name, .g-pct { color: var(--gc, var(--text)); }
+  .g-dot    { border-color: var(--gc, var(--muted)); }
+  .g-dot.lit { background: var(--gc); box-shadow: 0 0 8px var(--gc); }
+  .g-bar-fill { background: var(--gc, var(--cyan)); }
+  .g-card.active-gesture { border-color: var(--gc); }
+
+  /* ── Controls ── */
+  .ctrl-block { padding: 14px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
+
+  .btn-start {
+    width: 100%; padding: 11px;
+    background: transparent; border: 1px solid var(--cyan); color: var(--cyan);
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.2em; text-transform: uppercase; cursor: pointer; border-radius: 2px;
+    transition: all 0.2s; position: relative; overflow: hidden;
+  }
+  .btn-start::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(0,245,212,0.15), transparent);
+    transform: translateX(-100%); transition: transform 0.5s;
+  }
+  .btn-start:hover::before { transform: translateX(100%); }
+  .btn-start:hover { background: rgba(0,245,212,0.07); box-shadow: 0 0 18px rgba(0,245,212,0.15); }
+  .btn-start.running { border-color: var(--magenta); color: var(--magenta); }
+  .btn-start.running:hover { background: rgba(247,37,133,0.07); box-shadow: 0 0 18px rgba(247,37,133,0.15); }
+
+  .btn-hint { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 0.1em; text-align: center; }
+
+  .err-banner {
+    display: none; padding: 8px 12px; border: 1px solid rgba(247,37,133,0.35);
+    background: rgba(247,37,133,0.08); border-radius: 2px;
+    font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--magenta);
+    letter-spacing: 0.07em; line-height: 1.6;
+  }
+  .err-banner.show { display: block; }
+
+  /* Mobile */
+  @media (max-width: 640px) {
+    .main { grid-template-columns: 1fr; grid-template-rows: 1fr auto; overflow-y: auto; }
+    .inf-panel { border-left: none; border-top: 1px solid var(--border); max-height: 56vh; }
+    .waveform-panel { padding: 10px; gap: 8px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .logo-dot, .badge-live { animation: none; } }
 </style>
-
 </head>
-
 <body>
+<div class="shell">
 
-<div class="container">
+  <!-- ── Topbar ── -->
+  <header class="topbar">
+    <div class="logo"><div class="logo-dot"></div>GestureOS</div>
+    <div class="fps" id="fps">60 fps</div>
+    <div class="mode-badges">
+      <span class="badge badge-generic" id="bdgGeneric">Generic Sensor</span>
+      <span class="badge badge-hw"      id="bdgHW">HW Motion</span>
+      <span class="badge badge-sw"      id="bdgSW">SW Filter</span>
+      <span class="badge badge-live"    id="bdgLive" style="display:none">● LIVE</span>
+    </div>
+  </header>
 
-<div class="title">
+  <!-- ── Main ── -->
+  <div class="main">
 
-<h1>🤖 Real-Time Motion Gesture Classifier</h1>
+    <!-- LEFT -->
+    <div class="waveform-panel">
+      <div class="sec-label">Live Accelerometer · XYZ · 60 fps</div>
+      <div class="axis-rows">
 
-<p>Edge Impulse • ESP32 • Firebase Realtime Database</p>
+        <div class="axis-row">
+          <div class="axis-header">
+            <span class="axis-tag ax-x">X</span>
+            <span class="axis-val" id="vX">–</span>
+            <span class="axis-unit">m/s²</span>
+          </div>
+          <div class="canvas-wrap" id="wX"><canvas id="cX"></canvas></div>
+        </div>
 
-</div>
+        <div class="axis-row">
+          <div class="axis-header">
+            <span class="axis-tag ax-y">Y</span>
+            <span class="axis-val" id="vY">–</span>
+            <span class="axis-unit">m/s²</span>
+          </div>
+          <div class="canvas-wrap" id="wY"><canvas id="cY"></canvas></div>
+        </div>
 
-<div class="grid">
+        <div class="axis-row">
+          <div class="axis-header">
+            <span class="axis-tag ax-z">Z</span>
+            <span class="axis-val" id="vZ">–</span>
+            <span class="axis-unit">m/s²</span>
+          </div>
+          <div class="canvas-wrap" id="wZ"><canvas id="cZ"></canvas></div>
+        </div>
 
-<div class="card">
+      </div>
+    </div>
 
-<div class="label">
+    <!-- RIGHT -->
+    <div class="inf-panel">
 
-Current Gesture
+      <!-- Prediction hero -->
+      <div class="pred-hero">
+        <div class="conf-wrap">
+          <svg viewBox="0 0 76 76" width="76" height="76">
+            <circle class="ring-bg" cx="38" cy="38" r="33"/>
+            <circle class="ring-fg" id="ringFg" cx="38" cy="38" r="33"/>
+          </svg>
+          <div class="conf-pct" id="confPct">–</div>
+        </div>
+        <div class="pred-icon" id="predIcon">🤖</div>
+        <div class="pred-name idle-state" id="predName">WAITING</div>
+      </div>
 
-</div>
+      <!-- Gesture probability cards -->
+      <div class="inf-block">
+        <div class="sec-label" style="margin-bottom:12px">Probabilities</div>
+        <div class="gesture-cards" id="gCards">
 
-<div class="value blue" id="gesture">
+          <div class="g-card g-circle" id="gc-circle">
+            <div class="g-card-top">
+              <div class="g-dot" id="dot-circle"></div>
+              <span class="g-emoji">⭕</span>
+              <span class="g-name">Circle</span>
+              <span class="g-pct" id="pct-circle">0%</span>
+            </div>
+            <div class="g-bar-track"><div class="g-bar-fill" id="bar-circle"></div></div>
+          </div>
 
-Waiting...
+          <div class="g-card g-wave" id="gc-wave">
+            <div class="g-card-top">
+              <div class="g-dot" id="dot-wave"></div>
+              <span class="g-emoji">〰️</span>
+              <span class="g-name">Wave</span>
+              <span class="g-pct" id="pct-wave">0%</span>
+            </div>
+            <div class="g-bar-track"><div class="g-bar-fill" id="bar-wave"></div></div>
+          </div>
 
-</div>
+          <div class="g-card g-idle" id="gc-idle">
+            <div class="g-card-top">
+              <div class="g-dot" id="dot-idle"></div>
+              <span class="g-emoji">😶</span>
+              <span class="g-name">Idle</span>
+              <span class="g-pct" id="pct-idle">0%</span>
+            </div>
+            <div class="g-bar-track"><div class="g-bar-fill" id="bar-idle"></div></div>
+          </div>
 
-</div>
+        </div>
+      </div>
 
-<div class="card">
+      <!-- Controls -->
+      <div class="ctrl-block">
+        <button class="btn-start" id="startBtn">[ Start Sensors ]</button>
+        <div class="btn-hint" id="btnHint">Tap to begin</div>
+        <div class="err-banner" id="errBanner"></div>
+      </div>
 
-<div class="label">
-
-Confidence
-
-</div>
-
-<div class="value orange" id="confidence">
-
-0%
-
-</div>
-
-</div>
-
-<div class="card">
-
-<div class="label">
-
-Last Updated
-
-</div>
-
-<div class="value" style="font-size:22px;" id="time">
-
---
-
-</div>
-
-</div>
-
-<div class="card">
-
-<div class="label">
-
-Status
-
-</div>
-
-<div class="status">
-
-<div class="dot"></div>
-
-<div class="value green" style="font-size:24px;" id="status">
-
-Connected
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="history">
-
-<h2>Recent Predictions</h2>
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>Gesture</th>
-
-<th>Confidence</th>
-
-<th>Time</th>
-
-</tr>
-
-</thead>
-
-<tbody id="history">
-
-</tbody>
-
-</table>
-
-</div>
-
-<footer>
-
-Real-Time Motion Gesture Recognition Web App
-
-</footer>
-
+    </div>
+  </div>
 </div>
 
 <script>
+// ── Canvas ───────────────────────────────────────────────
+const CVS = {};
+['X','Y','Z'].forEach(a => {
+  const cv = document.getElementById('c'+a);
+  const wr = document.getElementById('w'+a);
+  const dpr = window.devicePixelRatio||1;
+  function resize() {
+    const r = wr.getBoundingClientRect();
+    cv.width = r.width*dpr; cv.height = r.height*dpr;
+    cv.getContext('2d').scale(dpr,dpr);
+  }
+  resize();
+  new ResizeObserver(resize).observe(wr);
+  CVS[a] = { cv, wr, ctx: cv.getContext('2d') };
+});
 
-const gestures = [
-"Left",
-"Right",
-"Up",
-"Down",
-"Idle"
-];
+// ── History buffers ───────────────────────────────────────
+const HIST = 200;
+const hX = new Float32Array(HIST);
+const hY = new Float32Array(HIST);
+const hZ = new Float32Array(HIST);
+let ptr = 0;
+let cX=0, cY=0, cZ=0;
 
-function randomUpdate(){
+// ── Draw wave ─────────────────────────────────────────────
+function drawWave(key, arr, color) {
+  const {cv, wr, ctx} = CVS[key];
+  const dpr = window.devicePixelRatio||1;
+  const W = wr.getBoundingClientRect().width;
+  const H = wr.getBoundingClientRect().height;
+  ctx.clearRect(0,0,W,H);
 
-const gesture = gestures[Math.floor(Math.random()*gestures.length)];
+  // zero line
+  ctx.beginPath(); ctx.strokeStyle='rgba(255,255,255,0.05)'; ctx.lineWidth=1;
+  ctx.moveTo(0,H/2); ctx.lineTo(W,H/2); ctx.stroke();
 
-const confidence = Math.floor(Math.random()*21)+80;
+  // wave
+  const step = W/HIST;
+  const scale = H/2/15;
+  ctx.beginPath(); ctx.strokeStyle=color; ctx.lineWidth=1.5;
+  ctx.shadowColor=color; ctx.shadowBlur=7; ctx.lineJoin='round';
+  for(let i=0;i<HIST;i++) {
+    const idx=(ptr+i)%HIST;
+    const x=i*step, y=H/2-arr[idx]*scale;
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.stroke(); ctx.shadowBlur=0;
 
-document.getElementById("gesture").innerHTML = gesture;
-document.getElementById("confidence").innerHTML = confidence + "%";
-document.getElementById("time").innerHTML = new Date().toLocaleTimeString();
-
-const row = document.createElement("tr");
-
-row.innerHTML = `
-<td>${gesture}</td>
-<td>${confidence}%</td>
-<td>${new Date().toLocaleTimeString()}</td>
-`;
-
-const history = document.getElementById("history");
-
-history.prepend(row);
-
-while(history.rows.length > 10){
-history.deleteRow(10);
+  // leading dot
+  const last = arr[(ptr+HIST-1)%HIST];
+  ctx.beginPath(); ctx.arc(W-step, H/2-last*scale, 3, 0, Math.PI*2);
+  ctx.fillStyle=color; ctx.shadowColor=color; ctx.shadowBlur=10; ctx.fill(); ctx.shadowBlur=0;
 }
 
+// ── Inference (heuristic for Circle / Wave / Idle) ────────
+// Real app: replace this with Edge Impulse WASM classifier
+let probs = {circle:0, wave:0, idle:1};
+
+function infer() {
+  const last30X = Array.from({length:30}, (_,i) => hX[(ptr+HIST-30+i)%HIST]);
+  const last30Y = Array.from({length:30}, (_,i) => hY[(ptr+HIST-30+i)%HIST]);
+
+  // variance on X
+  const varX = last30X.reduce((s,v)=>s+v*v,0)/30;
+  // variance on Y
+  const varY = last30Y.reduce((s,v)=>s+v*v,0)/30;
+  const mag = Math.sqrt(cX*cX+cY*cY+cZ*cZ);
+
+  // CIRCLE: both X and Y have moderate oscillation, roughly equal variance
+  const ratio = varX>0 ? Math.min(varX,varY)/Math.max(varX,varY) : 0;
+  const circleScore = Math.min(1, ratio * (varX+varY)/80);
+
+  // WAVE: high X variance, moderate Y
+  const waveScore = Math.min(1, varX/60 * (1 - ratio*0.5));
+
+  // IDLE: low total motion, near 1g on Z
+  const idleScore = Math.max(0, 1 - (varX+varY)/40) * Math.max(0, 1-Math.abs(mag-9.81)/5);
+
+  const raw = {circle: circleScore, wave: waveScore, idle: idleScore};
+  // softmax
+  const k = 4;
+  const expSum = Object.values(raw).reduce((s,v)=>s+Math.exp(v*k),0);
+  probs = Object.fromEntries(Object.entries(raw).map(([n,v])=>[n, Math.exp(v*k)/expSum]));
 }
 
-randomUpdate();
+// ── Update UI ─────────────────────────────────────────────
+const GESTURE_META = {
+  circle: { icon:'⭕', color:'#00F5D4' },
+  wave:   { icon:'〰️', color:'#F72585' },
+  idle:   { icon:'😶', color:'#FFB703' },
+};
+const CIRCUM = 2*Math.PI*33;
 
-setInterval(randomUpdate,3000);
+function updateUI() {
+  const keys = ['circle','wave','idle'];
+  let topKey = keys.reduce((a,b)=>probs[a]>probs[b]?a:b);
+  const topConf = probs[topKey];
 
+  keys.forEach(k => {
+    const pct = Math.round(probs[k]*100);
+    document.getElementById('pct-'+k).textContent = pct+'%';
+    document.getElementById('bar-'+k).style.width  = pct+'%';
+    const isTop = k===topKey && topConf>0.3 && running;
+    document.getElementById('gc-'+k).classList.toggle('active-gesture', isTop);
+    const dot = document.getElementById('dot-'+k);
+    dot.classList.toggle('lit', isTop);
+  });
+
+  const ring = document.getElementById('ringFg');
+  const meta = GESTURE_META[topKey];
+
+  if (running && topConf > 0.25) {
+    document.getElementById('predName').textContent = topKey.toUpperCase();
+    document.getElementById('predName').className   = 'pred-name';
+    document.getElementById('predName').style.color = meta.color;
+    document.getElementById('predIcon').textContent = meta.icon;
+    document.getElementById('predIcon').style.filter= `drop-shadow(0 0 12px ${meta.color}88)`;
+    ring.style.strokeDashoffset = CIRCUM*(1-topConf);
+    ring.style.stroke = meta.color;
+    ring.style.filter = `drop-shadow(0 0 6px ${meta.color})`;
+    document.getElementById('confPct').textContent  = Math.round(topConf*100)+'%';
+    document.getElementById('confPct').style.color  = meta.color;
+  } else {
+    document.getElementById('predName').textContent = 'WAITING';
+    document.getElementById('predName').className   = 'pred-name idle-state';
+    document.getElementById('predName').style.color = '';
+    document.getElementById('predIcon').textContent = '🤖';
+    document.getElementById('predIcon').style.filter= '';
+    ring.style.strokeDashoffset = CIRCUM;
+    ring.style.stroke = 'var(--cyan)';
+    ring.style.filter = '';
+    document.getElementById('confPct').textContent  = '–';
+    document.getElementById('confPct').style.color  = '';
+  }
+}
+
+// ── Sensor mode badge ─────────────────────────────────────
+function setSensorBadge(mode) {
+  ['bdgGeneric','bdgHW','bdgSW'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  const map = {generic:'bdgGeneric', hw:'bdgHW', sw:'bdgSW'};
+  if (map[mode]) document.getElementById(map[mode]).classList.add('active');
+}
+
+// ── Render loop ───────────────────────────────────────────
+let running=false, frameId=null, frameCount=0, lastFpsT=performance.now();
+
+function render() {
+  frameId=requestAnimationFrame(render);
+  hX[ptr]=cX; hY[ptr]=cY; hZ[ptr]=cZ;
+  ptr=(ptr+1)%HIST;
+
+  drawWave('X',hX,'#00F5D4');
+  drawWave('Y',hY,'#F72585');
+  drawWave('Z',hZ,'#FFB703');
+
+  document.getElementById('vX').textContent=cX.toFixed(2);
+  document.getElementById('vY').textContent=cY.toFixed(2);
+  document.getElementById('vZ').textContent=cZ.toFixed(2);
+
+  infer(); updateUI();
+
+  frameCount++;
+  const now=performance.now();
+  if(now-lastFpsT>1000){
+    document.getElementById('fps').textContent=Math.round(frameCount*1000/(now-lastFpsT))+' fps';
+    frameCount=0; lastFpsT=now;
+  }
+}
+
+// ── Demo simulation ───────────────────────────────────────
+let demoT=0, demoTimer=null;
+function demoTick(){
+  demoT+=0.06;
+  const phase=Math.floor(demoT/(Math.PI*2))%3;
+  if(phase===0){       // CIRCLE
+    cX=Math.sin(demoT*1.1)*7; cY=Math.cos(demoT*1.1)*7; cZ=1.5+Math.sin(demoT*0.3);
+  } else if(phase===1){ // WAVE
+    cX=Math.sin(demoT*2)*9; cY=Math.sin(demoT*0.3)*2; cZ=2+Math.cos(demoT*0.5);
+  } else {              // IDLE
+    cX=Math.sin(demoT*0.2)*0.8; cY=Math.cos(demoT*0.3)*0.6; cZ=9.81+Math.sin(demoT*0.1)*0.4;
+  }
+  demoTimer=setTimeout(demoTick,1000/60);
+}
+
+// ── Sensors ───────────────────────────────────────────────
+let sensor=null, dmHandler=null;
+
+function startSensors(){
+  const err=document.getElementById('errBanner');
+  err.classList.remove('show');
+
+  // Tier 1: Generic Sensor API (LinearAccelerationSensor)
+  if('LinearAccelerationSensor' in window){
+    try {
+      sensor=new LinearAccelerationSensor({frequency:62.5});
+      sensor.addEventListener('reading',()=>{cX=sensor.x||0;cY=sensor.y||0;cZ=sensor.z||0;});
+      sensor.addEventListener('error',e=>showErr(e.error?.message||'Sensor error'));
+      sensor.start(); setSensorBadge('generic'); return;
+    } catch(e){}
+  }
+
+  // Tier 2: DeviceMotionEvent (gravity-subtracted)
+  if(window.DeviceMotionEvent){
+    const doListen=()=>{
+      dmHandler=e=>{const a=e.acceleration;if(a){cX=a.x||0;cY=a.y||0;cZ=a.z||0;}};
+      window.addEventListener('devicemotion',dmHandler);
+      setSensorBadge('hw');
+    };
+    if(typeof DeviceMotionEvent.requestPermission==='function'){
+      DeviceMotionEvent.requestPermission()
+        .then(s=>{ if(s==='granted') doListen(); else showErr('Permission denied — try Demo mode.'); })
+        .catch(()=>showErr('Permission error — try Demo mode.'));
+      return;
+    }
+    doListen(); return;
+  }
+
+  // Tier 3: SW gravity filter (accelerationIncludingGravity with high-pass)
+  if(window.DeviceMotionEvent){
+    let gx=0,gy=0,gz=0; const ALPHA=0.8;
+    dmHandler=e=>{
+      const a=e.accelerationIncludingGravity;
+      if(a){gx=ALPHA*gx+(1-ALPHA)*(a.x||0);gy=ALPHA*gy+(1-ALPHA)*(a.y||0);gz=ALPHA*gz+(1-ALPHA)*(a.z||0);
+        cX=(a.x||0)-gx; cY=(a.y||0)-gy; cZ=(a.z||0)-gz;}
+    };
+    window.addEventListener('devicemotion',dmHandler);
+    setSensorBadge('sw'); return;
+  }
+
+  showErr('No sensor API available.\nUsing Demo mode automatically.');
+  demoTick(); setSensorBadge('generic');
+}
+
+function stopSensors(){
+  if(sensor){sensor.stop();sensor=null;}
+  if(dmHandler){window.removeEventListener('devicemotion',dmHandler);dmHandler=null;}
+  if(demoTimer){clearTimeout(demoTimer);demoTimer=null;}
+  cX=cY=cZ=0;
+}
+
+function showErr(msg){
+  const b=document.getElementById('errBanner');
+  b.textContent='⚠ '+msg; b.classList.add('show');
+}
+
+// ── Controls ──────────────────────────────────────────────
+document.getElementById('startBtn').addEventListener('click',()=>{
+  if(!running){
+    running=true;
+    startSensors(); render();
+    document.getElementById('startBtn').textContent='[ Stop Sensors ]';
+    document.getElementById('startBtn').classList.add('running');
+    document.getElementById('btnHint').textContent='Streaming live data';
+    document.getElementById('bdgLive').style.display='';
+  } else {
+    running=false;
+    stopSensors(); cancelAnimationFrame(frameId);
+    document.getElementById('startBtn').textContent='[ Start Sensors ]';
+    document.getElementById('startBtn').classList.remove('running');
+    document.getElementById('btnHint').textContent='Tap to begin';
+    document.getElementById('bdgLive').style.display='none';
+    ['Generic','HW','SW'].forEach(x=>document.getElementById('bdg'+x).classList.remove('active'));
+    probs={circle:0,wave:0,idle:0}; updateUI();
+  }
+});
+
+// Init ring dasharray
+document.getElementById('ringFg').style.strokeDasharray=CIRCUM;
 </script>
-
 </body>
 </html>
